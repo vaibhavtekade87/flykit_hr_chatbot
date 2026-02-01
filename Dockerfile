@@ -16,8 +16,8 @@ RUN pip install --no-cache-dir -r requirements.frontend.txt
 EXPOSE 7860
 EXPOSE 8000
 
-# Startup script — runs both FastAPI and Streamlit
-COPY start.sh /app/start.sh
+# Make start.sh executable
 RUN chmod +x /app/start.sh
 
+# Run startup script
 CMD ["/app/start.sh"]
