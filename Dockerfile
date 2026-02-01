@@ -2,8 +2,8 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
+# Install system dependencies including gcc for llama-cpp-python
+RUN apt-get update && apt-get install -y --no-install-recommends     curl     gcc     g++     make     cmake     && rm -rf /var/lib/apt/lists/*
 
 # Copy all files
 COPY . .
