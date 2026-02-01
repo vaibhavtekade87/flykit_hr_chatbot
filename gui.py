@@ -12,84 +12,87 @@ API_URL = "http://localhost:8000/query"
 # Page Config
 # -----------------------------------------------------------
 st.set_page_config(
-    page_title="Flykite Airlines — HR Assistant",
+    page_title="Flykite Airlines - HR Assistant",
     page_icon="✈️",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
 # -----------------------------------------------------------
-# Custom CSS — Production Dark Theme
+# Custom CSS - Light Theme
 # -----------------------------------------------------------
 st.markdown("""
 <style>
-    /* ── Hide Streamlit default chrome ── */
     #MainMenu, footer, .stDeployButton { display: none !important; }
     .block-container { padding-top: 0 !important; max-width: 760px !important; }
 
-    /* ── Full page background ── */
     .stApp {
-        background: #0a0e1a;
+        background: #f4f6f9;
         min-height: 100vh;
         font-family: 'Segoe UI', sans-serif;
     }
 
-    /* ── Header ── */
+    /* Header */
     .header-container {
         text-align: center;
         padding: 48px 20px 32px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid #dfe3ec;
         margin-bottom: 36px;
+        background: #ffffff;
+        border-radius: 0 0 16px 16px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
     .header-logo {
         font-size: 13px;
         font-weight: 600;
         letter-spacing: 3.5px;
         text-transform: uppercase;
-        color: #5b7cfa;
+        color: #3b5bdb;
         margin-bottom: 10px;
     }
     .header-title {
         font-size: 28px;
         font-weight: 300;
-        color: #e8eaf0;
+        color: #1a1f2e;
         letter-spacing: -0.5px;
     }
     .header-subtitle {
         font-size: 13px;
-        color: #4a5068;
+        color: #6b7280;
         margin-top: 6px;
-        font-weight: 400;
     }
 
-    /* ── Input Area ── */
-    .input-wrapper {
-        position: relative;
-        margin-bottom: 28px;
-    }
+    /* Input */
     .stTextArea textarea {
-        background: #111827 !important;
-        border: 1px solid rgba(255,255,255,0.08) !important;
+        background: #ffffff !important;
+        border: 1px solid #dfe3ec !important;
         border-radius: 14px !important;
-        color: #e2e8f0 !important;
+        color: #1a1f2e !important;
         font-size: 15px !important;
         padding: 18px 20px !important;
         resize: none !important;
         min-height: 80px !important;
         transition: border-color 0.3s ease !important;
         font-family: 'Segoe UI', sans-serif !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04) !important;
     }
     .stTextArea textarea:focus {
-        border-color: #5b7cfa !important;
-        box-shadow: 0 0 0 3px rgba(91,124,250,0.15) !important;
+        border-color: #3b5bdb !important;
+        box-shadow: 0 0 0 3px rgba(59,91,219,0.12) !important;
         outline: none !important;
     }
-    .stTextArea textarea::placeholder { color: #3d4258 !important; }
-    .stTextArea label { color: #4a5068 !important; font-size: 12px !important; letter-spacing: 1px !important; text-transform: uppercase !important; margin-bottom: 8px !important; }
+    .stTextArea textarea::placeholder { color: #9ca3af !important; }
+    .stTextArea label {
+        color: #6b7280 !important;
+        font-size: 12px !important;
+        letter-spacing: 1px !important;
+        text-transform: uppercase !important;
+        margin-bottom: 8px !important;
+    }
 
-    /* ── Submit Button ── */
+    /* Button */
     .stButton button {
-        background: linear-gradient(135deg, #5b7cfa, #6366f1) !important;
+        background: linear-gradient(135deg, #3b5bdb, #4c6ef5) !important;
         color: #fff !important;
         border: none !important;
         border-radius: 10px !important;
@@ -103,24 +106,25 @@ st.markdown("""
     }
     .stButton button:hover {
         transform: translateY(-1px) !important;
-        box-shadow: 0 6px 20px rgba(91,124,250,0.35) !important;
+        box-shadow: 0 6px 20px rgba(59,91,219,0.3) !important;
     }
     .stButton button:active { transform: translateY(0px) !important; }
     .stButton button:disabled {
-        background: #1e2235 !important;
-        color: #3d4258 !important;
+        background: #e5e7eb !important;
+        color: #9ca3af !important;
         cursor: not-allowed !important;
         box-shadow: none !important;
         transform: none !important;
     }
 
-    /* ── Response Card ── */
+    /* Response Card */
     .response-card {
-        background: #111827;
-        border: 1px solid rgba(255,255,255,0.07);
+        background: #ffffff;
+        border: 1px solid #dfe3ec;
         border-radius: 16px;
         padding: 28px 24px;
         margin-top: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
         animation: fadeSlideUp 0.4s ease;
     }
     .response-header {
@@ -129,12 +133,12 @@ st.markdown("""
         gap: 10px;
         margin-bottom: 16px;
         padding-bottom: 14px;
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid #eef1f7;
     }
     .response-icon {
         width: 32px;
         height: 32px;
-        background: linear-gradient(135deg, #5b7cfa, #6366f1);
+        background: linear-gradient(135deg, #3b5bdb, #4c6ef5);
         border-radius: 8px;
         display: flex;
         align-items: center;
@@ -146,68 +150,68 @@ st.markdown("""
         font-weight: 600;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        color: #5b7cfa;
+        color: #3b5bdb;
     }
     .response-time {
         font-size: 11px;
-        color: #3d4258;
+        color: #9ca3af;
         margin-left: auto;
     }
     .response-question {
         font-size: 13px;
-        color: #4a5068;
+        color: #6b7280;
         margin-bottom: 14px;
         font-style: italic;
     }
     .response-answer {
         font-size: 15px;
-        color: #c8ced9;
+        color: #374151;
         line-height: 1.75;
         white-space: pre-wrap;
     }
 
-    /* ── Loading Spinner ── */
+    /* Loading */
     .loading-container {
         display: flex;
         align-items: center;
         gap: 12px;
         padding: 20px 24px;
-        background: #111827;
-        border: 1px solid rgba(255,255,255,0.07);
+        background: #ffffff;
+        border: 1px solid #dfe3ec;
         border-radius: 16px;
         margin-top: 8px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
     .spinner {
         width: 20px;
         height: 20px;
-        border: 2px solid #1e2235;
-        border-top: 2px solid #5b7cfa;
+        border: 2px solid #e5e7eb;
+        border-top: 2px solid #3b5bdb;
         border-radius: 50%;
         animation: spin 0.7s linear infinite;
     }
-    .loading-text { color: #4a5068; font-size: 14px; }
+    .loading-text { color: #6b7280; font-size: 14px; }
 
-    /* ── Error Card ── */
+    /* Error */
     .error-card {
-        background: rgba(239,68,68,0.08);
-        border: 1px solid rgba(239,68,68,0.2);
+        background: #fef2f2;
+        border: 1px solid #fecaca;
         border-radius: 14px;
         padding: 18px 22px;
         margin-top: 8px;
-        color: #f87171;
+        color: #dc2626;
         font-size: 14px;
     }
 
-    /* ── Footer ── */
+    /* Footer */
     .app-footer {
         text-align: center;
         padding: 32px 20px 20px;
         font-size: 11px;
-        color: #2a2f3f;
+        color: #9ca3af;
         letter-spacing: 0.5px;
     }
 
-    /* ── Animations ── */
     @keyframes fadeSlideUp {
         from { opacity: 0; transform: translateY(12px); }
         to   { opacity: 1; transform: translateY(0); }
@@ -223,14 +227,14 @@ st.markdown("""
 # -----------------------------------------------------------
 st.markdown("""
 <div class="header-container">
-    <div class="header-logo">✈️ &nbsp; Flykite Airlines</div>
+    <div class="header-logo">✈️  Flykite Airlines</div>
     <div class="header-title">HR Policy Assistant</div>
     <div class="header-subtitle">Ask anything about our company policies</div>
 </div>
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------
-# Input Section
+# Input
 # -----------------------------------------------------------
 question = st.text_area(
     "Your Question",
@@ -245,7 +249,6 @@ submit = st.button("Ask", disabled=not question.strip())
 # Handle Submission
 # -----------------------------------------------------------
 if submit and question.strip():
-    # Show loading state
     loading_placeholder = st.empty()
     loading_placeholder.markdown("""
     <div class="loading-container">
@@ -256,13 +259,11 @@ if submit and question.strip():
 
     try:
         start = time.time()
-        # Call FastAPI backend
         resp = requests.post(API_URL, json={"question": question.strip()}, timeout=120)
         elapsed = time.time() - start
         resp.raise_for_status()
         data = resp.json()
 
-        # Clear loading, show response
         loading_placeholder.empty()
         loading_placeholder.markdown(f"""
         <div class="response-card">
@@ -280,14 +281,14 @@ if submit and question.strip():
         loading_placeholder.empty()
         loading_placeholder.markdown("""
         <div class="error-card">
-            ⚠️ Could not connect to the backend. Make sure the API server is running on port 8000.
+            Could not connect to the backend. Make sure the API server is running on port 8000.
         </div>
         """, unsafe_allow_html=True)
     except Exception as e:
         loading_placeholder.empty()
         loading_placeholder.markdown(f"""
         <div class="error-card">
-            ⚠️ Something went wrong: {str(e)}
+            Something went wrong: {str(e)}
         </div>
         """, unsafe_allow_html=True)
 
@@ -296,6 +297,6 @@ if submit and question.strip():
 # -----------------------------------------------------------
 st.markdown("""
 <div class="app-footer">
-    Flykite Airlines HR Policy Assistant &nbsp;·&nbsp; Powered by Llama 3.1 & RAG &nbsp;·&nbsp; Internal Use Only
+    Flykite Airlines HR Policy Assistant  ·  Powered by Llama 3.1 & RAG  ·  Internal Use Only
 </div>
 """, unsafe_allow_html=True)
