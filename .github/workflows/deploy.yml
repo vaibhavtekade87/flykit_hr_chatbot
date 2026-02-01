@@ -18,33 +18,35 @@ jobs:
         with:
           python-version: "3.10"
 
+      # Pin newer version that supports sdk param
       - name: Install huggingface_hub
-        run: pip install huggingface_hub
+        run: pip install --upgrade huggingface_hub>=0.23.0
 
       - name: Deploy to HuggingFace
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           python3 << 'EOF'
-          from huggingface_hub import HfApi, create_repo
+          from huggingface_hub import HfApi
           import os
 
           api = HfApi(token=os.environ["HF_TOKEN"])
           repo_id = "vaibhavtekade87/flykit-hr-chatbot"
 
+          # Create space if not exists
           try:
-              create_repo(
+              api.create_repo(
                   repo_id=repo_id,
                   repo_type="space",
                   sdk="docker",
                   private=True,
-                  exist_ok=True,
-                  token=os.environ["HF_TOKEN"]
+                  exist_ok=True
               )
-              print("Space created or already exists.")
+              print("Space ready.")
           except Exception as e:
-              print(f"Space creation note: {e}")
+              print(f"Create repo error: {e}")
 
+          # Upload files
           files_to_upload = [
               "app.py",
               "gui.py",
@@ -61,19 +63,18 @@ jobs:
                       path_or_fileobj=f,
                       path_in_repo=f,
                       repo_id=repo_id,
-                      repo_type="space",
-                      token=os.environ["HF_TOKEN"]
+                      repo_type="space"
                   )
                   print(f"Uploaded: {f}")
 
+          # Upload folders
           for folder in ["flykite_hr_vectordb", "sample_data"]:
               if os.path.exists(folder):
                   api.upload_folder(
                       folder_path=folder,
                       path_in_repo=folder,
                       repo_id=repo_id,
-                      repo_type="space",
-                      token=os.environ["HF_TOKEN"]
+                      repo_type="space"
                   )
                   print(f"Uploaded folder: {folder}")
 
