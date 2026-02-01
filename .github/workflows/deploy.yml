@@ -18,9 +18,8 @@ jobs:
         with:
           python-version: "3.10"
 
-      # Pin newer version that supports sdk param
       - name: Install huggingface_hub
-        run: pip install --upgrade huggingface_hub>=0.23.0
+        run: pip install --upgrade huggingface_hub
 
       - name: Deploy to HuggingFace
         env:
@@ -31,20 +30,7 @@ jobs:
           import os
 
           api = HfApi(token=os.environ["HF_TOKEN"])
-          repo_id = "vaibhavtekade87/flykit-hr-chatbot"
-
-          # Create space if not exists
-          try:
-              api.create_repo(
-                  repo_id=repo_id,
-                  repo_type="space",
-                  sdk="docker",
-                  private=True,
-                  exist_ok=True
-              )
-              print("Space ready.")
-          except Exception as e:
-              print(f"Create repo error: {e}")
+          repo_id = "tekadevaibhav/flykit-hr-chatbot"
 
           # Upload files
           files_to_upload = [
