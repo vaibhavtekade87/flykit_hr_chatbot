@@ -7,6 +7,8 @@ import time
 # Configuration
 # -----------------------------------------------------------
 API_URL = "http://localhost:8000/query"
+MAX_RETRIES = 3
+RETRY_DELAY = 5
 
 # -----------------------------------------------------------
 # Page Config
@@ -32,7 +34,6 @@ st.markdown("""
         font-family: 'Segoe UI', sans-serif;
     }
 
-    /* Header */
     .header-container {
         text-align: center;
         padding: 48px 20px 32px;
@@ -62,7 +63,6 @@ st.markdown("""
         margin-top: 6px;
     }
 
-    /* Input */
     .stTextArea textarea {
         background: #ffffff !important;
         border: 1px solid #dfe3ec !important;
@@ -90,7 +90,6 @@ st.markdown("""
         margin-bottom: 8px !important;
     }
 
-    /* Button */
     .stButton button {
         background: linear-gradient(135deg, #3b5bdb, #4c6ef5) !important;
         color: #fff !important;
@@ -117,7 +116,6 @@ st.markdown("""
         transform: none !important;
     }
 
-    /* Response Card */
     .response-card {
         background: #ffffff;
         border: 1px solid #dfe3ec;
@@ -170,7 +168,6 @@ st.markdown("""
         white-space: pre-wrap;
     }
 
-    /* Loading */
     .loading-container {
         display: flex;
         align-items: center;
@@ -192,7 +189,6 @@ st.markdown("""
     }
     .loading-text { color: #6b7280; font-size: 14px; }
 
-    /* Error */
     .error-card {
         background: #fef2f2;
         border: 1px solid #fecaca;
@@ -203,7 +199,6 @@ st.markdown("""
         font-size: 14px;
     }
 
-    /* Footer */
     .app-footer {
         text-align: center;
         padding: 32px 20px 20px;
@@ -227,14 +222,14 @@ st.markdown("""
 # -----------------------------------------------------------
 st.markdown("""
 <div class="header-container">
-    <div class="header-logo">✈️  Flykite Airlines</div>
+    <div class="header-logo">Flykite Airlines</div>
     <div class="header-title">HR Policy Assistant</div>
     <div class="header-subtitle">Ask anything about our company policies</div>
 </div>
 """, unsafe_allow_html=True)
 
 # -----------------------------------------------------------
-# Input
+# Input Section
 # -----------------------------------------------------------
 question = st.text_area(
     "Your Question",
@@ -247,6 +242,8 @@ submit = st.button("Ask", disabled=not question.strip())
 
 # -----------------------------------------------------------
 # Handle Submission
+# Retry logic handles slow backend startup (model download)
+# Retries 3 times with 5 second delay between attempts
 # -----------------------------------------------------------
 if submit and question.strip():
     loading_placeholder = st.empty()
@@ -257,46 +254,67 @@ if submit and question.strip():
     </div>
     """, unsafe_allow_html=True)
 
-    try:
-        start = time.time()
-        resp = requests.post(API_URL, json={"question": question.strip()}, timeout=120)
-        elapsed = time.time() - start
-        resp.raise_for_status()
-        data = resp.json()
+    answer_received = False
 
-        loading_placeholder.empty()
-        loading_placeholder.markdown(f"""
-        <div class="response-card">
-            <div class="response-header">
-                <div class="response-icon">🤖</div>
-                <span class="response-label">Response</span>
-                <span class="response-time">{elapsed:.1f}s</span>
+    for attempt in range(MAX_RETRIES):
+        try:
+            start = time.time()
+            # Call FastAPI backend with 300s timeout for model inference
+            resp = requests.post(API_URL, json={"question": question.strip()}, timeout=300)
+            elapsed = time.time() - start
+            resp.raise_for_status()
+            data = resp.json()
+
+            # Show response card
+            loading_placeholder.empty()
+            loading_placeholder.markdown(f"""
+            <div class="response-card">
+                <div class="response-header">
+                    <div class="response-icon">🤖</div>
+                    <span class="response-label">Response</span>
+                    <span class="response-time">{elapsed:.1f}s</span>
+                </div>
+                <div class="response-question">"{data['question']}"</div>
+                <div class="response-answer">{data['answer']}</div>
             </div>
-            <div class="response-question">"{data['question']}"</div>
-            <div class="response-answer">{data['answer']}</div>
-        </div>
-        """, unsafe_allow_html=True)
+            """, unsafe_allow_html=True)
+            answer_received = True
+            break
 
-    except requests.exceptions.ConnectionError:
-        loading_placeholder.empty()
-        loading_placeholder.markdown("""
-        <div class="error-card">
-            Could not connect to the backend. Make sure the API server is running on port 8000.
-        </div>
-        """, unsafe_allow_html=True)
-    except Exception as e:
-        loading_placeholder.empty()
-        loading_placeholder.markdown(f"""
-        <div class="error-card">
-            Something went wrong: {str(e)}
-        </div>
-        """, unsafe_allow_html=True)
+        except requests.exceptions.ConnectionError:
+            # Backend not ready yet, wait and retry
+            if attempt < MAX_RETRIES - 1:
+                loading_placeholder.markdown(f"""
+                <div class="loading-container">
+                    <div class="spinner"></div>
+                    <span class="loading-text">Backend is starting up... retrying ({attempt + 1}/{MAX_RETRIES})</span>
+                </div>
+                """, unsafe_allow_html=True)
+                time.sleep(RETRY_DELAY)
+            else:
+                # All retries failed
+                loading_placeholder.empty()
+                loading_placeholder.markdown("""
+                <div class="error-card">
+                    Backend is not available. It may still be loading the model. Please wait a few minutes and try again.
+                </div>
+                """, unsafe_allow_html=True)
+
+        except Exception as e:
+            # Any other error
+            loading_placeholder.empty()
+            loading_placeholder.markdown(f"""
+            <div class="error-card">
+                Something went wrong: {str(e)}
+            </div>
+            """, unsafe_allow_html=True)
+            break
 
 # -----------------------------------------------------------
 # Footer
 # -----------------------------------------------------------
 st.markdown("""
 <div class="app-footer">
-    Flykite Airlines HR Policy Assistant  ·  Powered by Llama 3.1 & RAG  ·  Internal Use Only
+    Flykite Airlines HR Policy Assistant  |  Powered by Llama 3.1 and RAG  |  Internal Use Only
 </div>
 """, unsafe_allow_html=True)

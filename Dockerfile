@@ -2,22 +2,24 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-# Install system dependencies including gcc for llama-cpp-python
+# Install gcc and build tools needed for llama-cpp-python
 RUN apt-get update && apt-get install -y --no-install-recommends     curl     gcc     g++     make     cmake     && rm -rf /var/lib/apt/lists/*
 
-# Copy all files
+# Copy all project files into container
 COPY . .
 
-# Install all dependencies
+# Install backend dependencies
 RUN pip install --no-cache-dir -r requirements.backend.txt
+
+# Install frontend dependencies
 RUN pip install --no-cache-dir -r requirements.frontend.txt
 
-# Expose both ports
+# Expose Streamlit port (HuggingFace default) and FastAPI port
 EXPOSE 7860
 EXPOSE 8000
 
-# Make start.sh executable
+# Make startup script executable
 RUN chmod +x /app/start.sh
 
-# Run startup script
+# Run the startup script which launches both services
 CMD ["/app/start.sh"]

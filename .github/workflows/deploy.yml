@@ -10,17 +10,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Checkout the GitHub repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # Setup Python for huggingface_hub
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # Install huggingface_hub for uploading
       - name: Install huggingface_hub
         run: pip install --upgrade huggingface_hub
 
+      # Upload all files to HuggingFace Space
       - name: Deploy to HuggingFace
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
@@ -32,7 +36,7 @@ jobs:
           api = HfApi(token=os.environ["HF_TOKEN"])
           repo_id = "tekadevaibhav/flykit-hr-chatbot"
 
-          # Upload all files
+          # All individual files to upload
           files_to_upload = [
               "app.py",
               "gui.py",
@@ -45,6 +49,7 @@ jobs:
               "requirements.frontend.txt",
           ]
 
+          # Upload each file one by one
           for f in files_to_upload:
               if os.path.exists(f):
                   api.upload_file(
@@ -55,7 +60,7 @@ jobs:
                   )
                   print(f"Uploaded: {f}")
 
-          # Upload folders
+          # Upload folders (ChromaDB vectorstore and sample data)
           for folder in ["flykite_hr_vectordb", "sample_data"]:
               if os.path.exists(folder):
                   api.upload_folder(
