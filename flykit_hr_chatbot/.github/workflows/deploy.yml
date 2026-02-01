@@ -1,0 +1,39 @@
+
+name: Deploy to HuggingFace Spaces
+
+# Trigger on every push to main branch
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # ---------------------------------------------------
+      # Step 1: Checkout the repo
+      # ---------------------------------------------------
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # ---------------------------------------------------
+      # Step 2: Install git LFS (for large model files if needed)
+      # ---------------------------------------------------
+      - name: Install Git LFS
+        run: git lfs install
+
+      # ---------------------------------------------------
+      # Step 3: Push repo to HuggingFace Spaces
+      # Uses HF_TOKEN secret stored in GitHub
+      # ---------------------------------------------------
+      - name: Push to HuggingFace Spaces
+        uses: huggingface/hub-action@v0.1.0
+        with:
+          # Target Space on HuggingFace
+          repo_id: vaibhavtekade87/flykit-hr-chatbot
+          # Token from GitHub Secrets
+          token: ${{ secrets.HF_TOKEN }}
+          # Push entire repo
+          path: .
