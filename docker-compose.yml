@@ -1,0 +1,25 @@
+
+version: "3.8"
+
+services:
+  # FastAPI backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    # Restart automatically if it crashes
+    restart: always
+
+  # Streamlit frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    # Wait for backend to be ready
+    depends_on:
+      - backend
+    restart: always

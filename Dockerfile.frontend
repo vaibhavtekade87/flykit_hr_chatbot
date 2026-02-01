@@ -1,0 +1,19 @@
+
+# Base image — lightweight Python
+FROM python:3.10-slim
+
+# Set working directory
+WORKDIR /app
+
+# Copy requirements and install dependencies
+COPY requirements.frontend.txt .
+RUN pip install --no-cache-dir -r requirements.frontend.txt
+
+# Copy gui.py
+COPY gui.py .
+
+# Expose Streamlit port
+EXPOSE 8501
+
+# Start Streamlit — disable auto-rerun and menu
+CMD ["streamlit", "run", "gui.py", "--server.port=8501", "--server.headless=true", "--browser.gatherUsageStats=false"]
