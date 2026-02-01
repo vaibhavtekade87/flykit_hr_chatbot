@@ -1,7 +1,5 @@
-
 name: Deploy to HuggingFace Spaces
 
-# Trigger on every push to main branch
 on:
   push:
     branches:
@@ -12,28 +10,79 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ---------------------------------------------------
-      # Step 1: Checkout the repo
-      # ---------------------------------------------------
+      # Checkout GitHub repo
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # ---------------------------------------------------
-      # Step 2: Install git LFS (for large model files if needed)
-      # ---------------------------------------------------
-      - name: Install Git LFS
-        run: git lfs install
-
-      # ---------------------------------------------------
-      # Step 3: Push repo to HuggingFace Spaces
-      # Uses HF_TOKEN secret stored in GitHub
-      # ---------------------------------------------------
-      - name: Push to HuggingFace Spaces
-        uses: huggingface/hub-action@v0.1.0
+      # Install Python and huggingface_hub
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          # Target Space on HuggingFace
-          repo_id: vaibhavtekade87/flykit-hr-chatbot
-          # Token from GitHub Secrets
-          token: ${{ secrets.HF_TOKEN }}
-          # Push entire repo
-          path: .
+          python-version: "3.10"
+
+      - name: Install huggingface_hub
+        run: pip install huggingface_hub
+
+      # Create Space (if not exists) and upload all files
+      - name: Deploy to HuggingFace
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          python3 << 'EOF'
+          from huggingface_hub import HfApi, create_repo
+          import os
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          repo_id = "vaibhavtekade87/flykit-hr-chatbot"
+
+          # Create Space if not exists (sdk=docker)
+          try:
+              create_repo(
+                  repo_id=repo_id,
+                  repo_type="space",
+                  sdk="docker",
+                  private=True,
+                  exist_ok=True,
+                  token=os.environ["HF_TOKEN"]
+              )
+              print("Space created or already exists.")
+          except Exception as e:
+              print(f"Space creation note: {e}")
+
+          # Upload all required files
+          files_to_upload = [
+              "app.py",
+              "gui.py",
+              "Dockerfile.backend",
+              "Dockerfile.frontend",
+              "docker-compose.yml",
+              "requirements.backend.txt",
+              "requirements.frontend.txt",
+          ]
+
+          # Upload individual files
+          for f in files_to_upload:
+              if os.path.exists(f):
+                  api.upload_file(
+                      path_or_fileobj=f,
+                      path_in_repo=f,
+                      repo_id=repo_id,
+                      repo_type="space",
+                      token=os.environ["HF_TOKEN"]
+                  )
+                  print(f"Uploaded: {f}")
+
+          # Upload folders
+          for folder in ["flykite_hr_vectordb", "sample_data"]:
+              if os.path.exists(folder):
+                  api.upload_folder(
+                      folder_path=folder,
+                      path_in_repo=folder,
+                      repo_id=repo_id,
+                      repo_type="space",
+                      token=os.environ["HF_TOKEN"]
+                  )
+                  print(f"Uploaded folder: {folder}")
+
+          print("Deployment complete.")
+          EOF
