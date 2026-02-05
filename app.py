@@ -11,22 +11,17 @@ MODEL_ID = "HuggingFaceTB/SmolLM3-3B"
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
 RETRIEVAL_K = 5
-MAX_TOKENS = 768
-TEMPERATURE = 0.2
-TOP_P = 0.92
+MAX_TOKENS = 512
+TEMPERATURE = 0.1
+TOP_P = 0.9
 
-SYSTEM_PROMPT = """You are the Flykite Airlines HR Policy Assistant.
-Answer employee questions accurately and professionally based ONLY on the provided context.
-Do not hallucinate or make assumptions beyond the given context.
-If the answer is not in the context, politely say you cannot find that information."""
+SYSTEM_PROMPT = """You are Flykite Airlines HR Policy Assistant. Answer questions using ONLY the provided context. Be concise and direct. Do not add explanations, reasoning, or extra details not in the context."""
 
-USER_TEMPLATE = """Context:
-{context}
+USER_TEMPLATE = """{context}
 
-Question:
-{question}
+Question: {question}
 
-Please provide a detailed and accurate answer based on the context above."""
+Answer based strictly on the context above. Be brief and factual."""
 
 print("Loading embedding model...")
 embedding_model = HuggingFaceEmbeddings(model_name=EMBEDDING_MODEL)
