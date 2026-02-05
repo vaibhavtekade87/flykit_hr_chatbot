@@ -7,7 +7,7 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 CHROMA_PATH = "./flykite_hr_vectordb"
 EMBEDDING_MODEL = "thenlper/gte-large"
-MODEL_ID = "microsoft/Phi-3-mini-4k-instruct"
+MODEL_ID = "HuggingFaceTB/SmolLM3-3B"
 HF_TOKEN = os.environ.get("HF_TOKEN", "")
 
 RETRIEVAL_K = 5
