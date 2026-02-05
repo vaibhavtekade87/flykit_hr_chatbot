@@ -20,10 +20,10 @@ Answer employee questions accurately and professionally based ONLY on the provid
 Do not hallucinate or make assumptions beyond the given context.
 If the answer is not in the context, politely say you cannot find that information."""
 
-USER_TEMPLATE = """###Context
+USER_TEMPLATE = """Context:
 {context}
 
-###Question
+Question:
 {question}
 
 Please provide a detailed and accurate answer based on the context above."""
@@ -58,16 +58,21 @@ def query(request: QueryRequest):
     docs = retriever.invoke(question)
     context = "\n\n".join([doc.page_content for doc in docs])
     
-    prompt = f"{SYSTEM_PROMPT}\n\n{USER_TEMPLATE.format(context=context, question=question)}"
+    user_message = USER_TEMPLATE.format(context=context, question=question)
     
-    output = client.text_generation(
-        prompt=prompt,
-        max_new_tokens=MAX_TOKENS,
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": user_message}
+    ]
+    
+    response = client.chat_completion(
+        messages=messages,
+        max_tokens=MAX_TOKENS,
         temperature=TEMPERATURE,
         top_p=TOP_P
     )
     
-    answer = output.strip()
+    answer = response.choices[0].message.content.strip()
     
     return QueryResponse(question=question, answer=answer)
 
